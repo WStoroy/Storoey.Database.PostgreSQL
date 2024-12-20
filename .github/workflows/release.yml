@@ -20,6 +20,9 @@ defaults:
 
 jobs:
   create_nuget:
+    permissions:
+      contents: read
+      pull-requests: write
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -51,6 +54,8 @@ jobs:
   #    run: dotnet test --configuration Release
 
   deploy:
+    permissions:
+      pull-requests: write
     # Publish only when creating a GitHub Release
     # https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository
     # You can update this logic if you want to manage releases differently
