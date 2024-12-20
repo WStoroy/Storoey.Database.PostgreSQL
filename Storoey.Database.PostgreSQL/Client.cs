@@ -8,8 +8,8 @@ using Storoey.Database.PostgreSQL.Parameters;
 namespace Storoey.Database.PostgreSQL;
 
 /// <summary>
-/// Represents a client for interacting with a PostgreSQL database using specified options.
-/// Provides methods for performing CRUD operations as well as managing connections and transactions.
+///     Represents a client for interacting with a PostgreSQL database using specified options.
+///     Provides methods for performing CRUD operations as well as managing connections and transactions.
 /// </summary>
 public class Client(ClientOptions clientOptions) : IAsyncDisposable
 {
@@ -20,8 +20,8 @@ public class Client(ClientOptions clientOptions) : IAsyncDisposable
     private NpgsqlConnection? _connection;
 
     /// <summary>
-    /// Disposes of resources used by the client asynchronously, including closing connections and disposing
-    /// of the underlying PostgreSQL data source.
+    ///     Disposes of resources used by the client asynchronously, including closing connections and disposing
+    ///     of the underlying PostgreSQL data source.
     /// </summary>
     /// <returns>A task that represents the asynchronous dispose operation.</returns>
     public async ValueTask DisposeAsync()
@@ -33,7 +33,7 @@ public class Client(ClientOptions clientOptions) : IAsyncDisposable
     }
 
     /// <summary>
-    /// Generates the next unique identity value using a snowflake ID generator.
+    ///     Generates the next unique identity value using a snowflake ID generator.
     /// </summary>
     /// <returns>The next unique identity value as a long integer.</returns>
     public long NextIdentity()
@@ -136,25 +136,34 @@ public class Client(ClientOptions clientOptions) : IAsyncDisposable
     }
 
     /// <summary>
-    /// Executes a SQL query and retrieves the first row or null if no rows match the query.
+    ///     Executes a SQL query and retrieves the first row or null if no rows match the query.
     /// </summary>
-    /// <param name="parameters">The parameters required for executing the query, including the SQL command text, query parameters, and optional transaction information.</param>
+    /// <param name="parameters">
+    ///     The parameters required for executing the query, including the SQL command text, query
+    ///     parameters, and optional transaction information.
+    /// </param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
-    /// <returns>A task that represents the asynchronous operation. The task result contains the first row of the query result or null if no rows are found.</returns>
+    /// <returns>
+    ///     A task that represents the asynchronous operation. The task result contains the first row of the query result
+    ///     or null if no rows are found.
+    /// </returns>
     public async Task<TableRow?> FirstOrDefault(WhereParameter parameters,
         CancellationToken cancellationToken = default)
     {
         await Connect(cancellationToken);
-        
+
         await using var command = _connection!.CreateCommand();
-        command.CommandText = parameters.CommandText.Contains("LIMIT") ? parameters.CommandText : parameters.CommandText + " LIMIT 1";
+        command.CommandText = parameters.CommandText.Contains("LIMIT")
+            ? parameters.CommandText
+            : parameters.CommandText + " LIMIT 1";
         if (parameters.Parameters is not null)
         {
-            command.Parameters.AddRange(parameters.Parameters.Select(parameter => parameter.ToNpgsqlParameter()).ToArray());
+            command.Parameters.AddRange(parameters.Parameters.Select(parameter => parameter.ToNpgsqlParameter())
+                .ToArray());
         }
 
         await command.PrepareAsync(cancellationToken);
-        
+
         await using var reader = await command.ExecuteReaderAsync(cancellationToken);
         if (!await reader.ReadAsync(cancellationToken))
         {
@@ -179,12 +188,12 @@ public class Client(ClientOptions clientOptions) : IAsyncDisposable
                 Type = columnType
             };
         }
-        
+
         return tableRow;
     }
 
     /// <summary>
-    /// Executes a WHERE query on the PostgreSQL database and retrieves matching rows.
+    ///     Executes a WHERE query on the PostgreSQL database and retrieves matching rows.
     /// </summary>
     /// <param name="parameters">The WHERE query parameters, including the SQL command text and optional parameters.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests during the operation.</param>
@@ -192,16 +201,17 @@ public class Client(ClientOptions clientOptions) : IAsyncDisposable
     public async Task<TableRow[]> Where(WhereParameter parameters, CancellationToken cancellationToken = default)
     {
         await Connect(cancellationToken);
-        
+
         await using var command = _connection!.CreateCommand();
         command.CommandText = parameters.CommandText;
         if (parameters.Parameters is not null)
         {
-            command.Parameters.AddRange(parameters.Parameters.Select(parameter => parameter.ToNpgsqlParameter()).ToArray());
+            command.Parameters.AddRange(parameters.Parameters.Select(parameter => parameter.ToNpgsqlParameter())
+                .ToArray());
         }
 
         await command.PrepareAsync(cancellationToken);
-        
+
         await using var reader = await command.ExecuteReaderAsync(cancellationToken);
 
         var tableRows = new List<TableRow>();
@@ -212,7 +222,7 @@ public class Client(ClientOptions clientOptions) : IAsyncDisposable
             {
                 Columns = new TableColumn[reader.FieldCount]
             };
-            
+
             for (var fieldIndex = 0; fieldIndex < reader.FieldCount; fieldIndex++)
             {
                 var columnType = reader.GetFieldType(fieldIndex);
@@ -226,10 +236,10 @@ public class Client(ClientOptions clientOptions) : IAsyncDisposable
                     Type = columnType
                 };
             }
-            
+
             tableRows.Add(tableRow);
         }
-        
+
         return tableRows.ToArray();
     }
 }
