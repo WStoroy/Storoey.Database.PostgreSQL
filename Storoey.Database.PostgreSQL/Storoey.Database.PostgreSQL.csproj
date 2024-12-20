@@ -1,0 +1,42 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <EnablePackageValidation>true</EnablePackageValidation>
+        <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+        <Company>Storoey</Company>
+        <Authors>Fredrik Wilhelmsen Storøy</Authors>
+        <PackageId>Storoey.Database.PostgreSQL</PackageId>
+        <Title>Storoey.Database.PostgreSQL</Title>
+        <Description>Client for PostgreSQL</Description>
+        <Copyright>Storoey</Copyright>
+        <PackageProjectUrl>https://nuget.wstoroy.no/storoey.database.postgresql</PackageProjectUrl>
+        <PackageLicenseUrl>https://nuget.wstoroy.no</PackageLicenseUrl>
+        <License>https://nuget.wstoroy.no</License>
+        <MinVerTagPrefix>v</MinVerTagPrefix>
+        <MinVerDefaultPreReleaseIdentifiers>preview.0</MinVerDefaultPreReleaseIdentifiers>
+        <PackageTags>PostgreSQL</PackageTags>
+    </PropertyGroup>
+    
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+        <DebugType>embedded</DebugType>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+        <EmbedAllSources>true</EmbedAllSources>
+    </PropertyGroup>
+    
+    <ItemGroup>
+      <PackageReference Include="MinVer" Version="6.0.0">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
+      <PackageReference Include="Npgsql" Version="9.0.2" />
+      <PackageReference Include="SnowflakeIDGenerator" Version="1.5.2024.337" />
+    </ItemGroup>
+
+</Project>
