@@ -27,6 +27,16 @@ public class ClientIntegrationTests
     }
 
     [Fact]
+    public async Task Test()
+    {
+        await _client.Insert(new InsertParameter
+        {
+            CommandText = "INSERT INTO bulkTest (id, name, title) VALUES ($1, $2, $3)",
+            Values = [_client.NextIdentity(), "Johnny", "User"],
+        });
+    }
+    
+    [Fact]
     public async Task Test1()
     {
         await _client.InsertBatch(new InsertBatchParameter
