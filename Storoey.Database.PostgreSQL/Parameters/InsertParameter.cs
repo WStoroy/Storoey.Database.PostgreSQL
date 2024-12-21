@@ -6,7 +6,7 @@ namespace Storoey.Database.PostgreSQL.Parameters;
 /// <summary>
 ///     Represents the parameters used for executing an INSERT command in a PostgreSQL database.
 /// </summary>
-public sealed record InsertParameter
+public record InsertParameter
 {
     /// <summary>
     ///     Gets the SQL command text to be executed in a PostgreSQL database.

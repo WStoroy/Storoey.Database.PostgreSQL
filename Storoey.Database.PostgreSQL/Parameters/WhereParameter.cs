@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Npgsql;
 
 namespace Storoey.Database.PostgreSQL.Parameters;
 
@@ -11,7 +12,7 @@ namespace Storoey.Database.PostgreSQL.Parameters;
 ///     <see cref="Parameters" />
 ///     property holds the values to be substituted into the query's parameter placeholders.
 /// </remarks>
-public sealed record WhereParameter
+public record WhereParameter
 {
     /// <summary>
     ///     Gets the SQL query or statement that represents the parameterized WHERE clause.

@@ -12,7 +12,7 @@ namespace Storoey.Database.PostgreSQL.Parameters;
 /// <example>
 ///     Can be used to specify the table and data for inserting multiple rows at once.
 /// </example>
-public sealed record InsertBatchParameter
+public record InsertBatchParameter
 {
     /// <summary>
     ///     Represents the name of the PostgreSQL table targeted for batch data insertion.

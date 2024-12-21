@@ -6,10 +6,14 @@ using Xunit.Abstractions;
 
 namespace Storoey.Database.PostgreSQL.Test;
 
+/// <summary>
+///     These tests are only for testing the functionality locally.
+///     Might implement real tests in the future 🤡
+/// </summary>
 public class ClientIntegrationTests
 {
-    private readonly ITestOutputHelper _testOutputHelper;
     private readonly Client _client;
+    private readonly ITestOutputHelper _testOutputHelper;
 
     public ClientIntegrationTests(ITestOutputHelper testOutputHelper)
     {
@@ -32,10 +36,10 @@ public class ClientIntegrationTests
         await _client.Insert(new InsertParameter
         {
             CommandText = "INSERT INTO bulkTest (id, name, title) VALUES ($1, $2, $3)",
-            Values = [_client.NextIdentity(), "Johnny", "User"],
+            Values = [_client.NextIdentity(), "Johnny", "User"]
         });
     }
-    
+
     [Fact]
     public async Task Test1()
     {
@@ -43,10 +47,11 @@ public class ClientIntegrationTests
         {
             Table = "bulkTest",
             Columns = ["id", "name", "title"],
-            Values = [
+            Values =
+            [
                 [Guid.NewGuid(), "Fredrik", "Owner"],
                 [Guid.NewGuid(), "Pablo", DBNull.Value]
-            ],
+            ]
         });
     }
 
@@ -54,16 +59,17 @@ public class ClientIntegrationTests
     public async Task BulkLarge()
     {
         var start = DateTime.Now;
-        
+
         await _client.InsertBatch(new InsertBatchParameter
         {
             Table = "bulkTest2",
             Columns = ["id", "name", "title"],
-            Values = Enumerable.Range(0, 10_000_00).Select(i => new object[] { _client.NextIdentity(), $"Name {i}", $"Title {i}" }).ToArray(),
+            Values = Enumerable.Range(0, 10_000_00)
+                .Select(i => new object[] { _client.NextIdentity(), $"Name {i}", $"Title {i}" }).ToArray()
         });
-        
+
         var end = DateTime.Now;
-        
+
         _testOutputHelper.WriteLine((end - start).ToString("c"));
     }
 
@@ -75,11 +81,11 @@ public class ClientIntegrationTests
             CommandText = "SELECT * FROM bulkTest2 WHERE id = $1",
             Parameters = [7275673987122729055]
         });
-        
+
         Assert.NotNull(result);
         Assert.Equal("Name 95", result["name"]);
     }
-    
+
     [Fact]
     public async Task Where()
     {
@@ -88,10 +94,10 @@ public class ClientIntegrationTests
             CommandText = "SELECT * FROM bulkTest2 WHERE id < $1 OR id > $2 ORDER BY id",
             Parameters = [7275673987122728970, 7275673996270509902]
         });
-        
+
         Assert.NotEmpty(result);
         Assert.Equal(20, result.Length);
-        
+
         Assert.Equal("Name 0", result[0]["name"]);
         Assert.Equal("Name 1", result[1]["name"]);
         Assert.Equal("Name 2", result[2]["name"]);
@@ -102,7 +108,7 @@ public class ClientIntegrationTests
         Assert.Equal("Name 7", result[7]["name"]);
         Assert.Equal("Name 8", result[8]["name"]);
         Assert.Equal("Name 9", result[9]["name"]);
-        
+
         Assert.Equal("Name 999990", result[10]["name"]);
         Assert.Equal("Name 999991", result[11]["name"]);
         Assert.Equal("Name 999992", result[12]["name"]);
@@ -113,6 +119,27 @@ public class ClientIntegrationTests
         Assert.Equal("Name 999997", result[17]["name"]);
         Assert.Equal("Name 999998", result[18]["name"]);
         Assert.Equal("Name 999999", result[19]["name"]);
-
     }
+
+    [Fact]
+    public async Task MappedWhere()
+    {
+        var result = await _client.Where(new MappedWhereParameter<PersonWithId>
+        {
+            CommandText = "SELECT * FROM bulkTest",
+            Map = reader => new PersonWithId
+            {
+                Id = reader.GetFieldValue<Guid>(0),
+                Name = reader.GetFieldValue<string>(1),
+                Title = reader.GetFieldValue<string>(2)
+            }
+        });
+    }
+}
+
+public record PersonWithId
+{
+    public Guid Id { get; init; } = Guid.Empty;
+    public string Name { get; init; } = string.Empty;
+    public string Title { get; init; } = string.Empty;
 }

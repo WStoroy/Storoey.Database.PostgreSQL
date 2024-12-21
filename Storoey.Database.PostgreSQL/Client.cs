@@ -242,4 +242,30 @@ public class Client(ClientOptions clientOptions) : IAsyncDisposable
 
         return tableRows.ToArray();
     }
+    
+    public async Task<T[]> Where<T>(MappedWhereParameter<T> parameters, CancellationToken cancellationToken = default) where T : new()
+    {
+        await Connect(cancellationToken);
+
+        await using var command = _connection!.CreateCommand();
+        command.CommandText = parameters.CommandText;
+        if (parameters.Parameters is not null)
+        {
+            command.Parameters.AddRange(parameters.Parameters.Select(parameter => parameter.ToNpgsqlParameter())
+                .ToArray());
+        }
+
+        await command.PrepareAsync(cancellationToken);
+
+        await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+
+        var tableRows = new List<T>();
+
+        while (await reader.ReadAsync(cancellationToken))
+        {
+            tableRows.Add(parameters.Map(reader));
+        }
+
+        return tableRows.ToArray();
+    }
 }
