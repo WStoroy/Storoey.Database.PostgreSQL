@@ -1,5 +1,6 @@
 using Npgsql;
 using NpgsqlTypes;
+using Storoey.Database.PostgreSQL.Exceptions;
 
 namespace Storoey.Database.PostgreSQL.Extensions;
 
@@ -48,7 +49,7 @@ public static class ObjectExtensions
 
         if (!DotNetTypeToNpgsqlDbType.TryGetValue(dotnetType, out var npgsqlDbType))
         {
-            throw new Exception($"Unknown .NET type: {dotnetType.FullName}");
+            throw new UnknownTypeException($"Unknown .NET type: {dotnetType.FullName}");
         }
 
         return npgsqlDbType;
@@ -76,6 +77,7 @@ public static class ObjectExtensions
         }
 
         Console.WriteLine($"Unknown .NET type: {dotnetType.FullName}");
+        npgsqlDbType = NpgsqlDbType.Unknown;
         return false;
     }
 
@@ -94,7 +96,7 @@ public static class ObjectExtensions
 
         if (!DotNetTypeToNpgsqlDbType.TryGetValue(dotnetType, out var npgsqlDbType))
         {
-            throw new Exception($"Unknown .NET type: {dotnetType.FullName}");
+            throw new UnknownTypeException($"Unknown .NET type: {dotnetType.FullName}");
         }
 
         return new NpgsqlParameter

@@ -38,7 +38,7 @@ public class Client(ClientOptions clientOptions) : IAsyncDisposable
     /// <returns>The next unique identity value as a long integer.</returns>
     public long NextIdentity()
     {
-        return _snowflakeIdGenerator.Next();
+        return _snowflakeIdGenerator.CreateId();
     }
 
     /// <summary>
@@ -242,7 +242,7 @@ public class Client(ClientOptions clientOptions) : IAsyncDisposable
 
         return tableRows.ToArray();
     }
-    
+
     public async Task<T[]> Where<T>(MappedWhereParameter<T> parameters, CancellationToken cancellationToken = default)
         where T : new()
     {
