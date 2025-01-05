@@ -1,5 +1,5 @@
+using IdGen;
 using Npgsql;
-using SnowflakeID;
 using Storoey.Database.PostgreSQL.Extensions;
 using Storoey.Database.PostgreSQL.Models;
 using Storoey.Database.PostgreSQL.Options;
@@ -16,7 +16,7 @@ public class Client(ClientOptions clientOptions) : IAsyncDisposable
     private readonly NpgsqlDataSource _dataSource = NpgsqlDataSource.Create(
         $"Host={clientOptions.Host};Port={clientOptions.Port};Database={clientOptions.Database};Username={clientOptions.Username};Password={clientOptions.Password};");
 
-    private readonly SnowflakeIDGenerator _snowflakeIdGenerator = new(clientOptions.MachineId);
+    private readonly IdGenerator _snowflakeIdGenerator = new(clientOptions.MachineId);
     private NpgsqlConnection? _connection;
 
     /// <summary>
@@ -243,7 +243,8 @@ public class Client(ClientOptions clientOptions) : IAsyncDisposable
         return tableRows.ToArray();
     }
     
-    public async Task<T[]> Where<T>(MappedWhereParameter<T> parameters, CancellationToken cancellationToken = default) where T : new()
+    public async Task<T[]> Where<T>(MappedWhereParameter<T> parameters, CancellationToken cancellationToken = default)
+        where T : new()
     {
         await Connect(cancellationToken);
 

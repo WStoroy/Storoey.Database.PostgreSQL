@@ -1,4 +1,4 @@
-using SnowflakeID;
+using IdGen;
 
 namespace Storoey.Database.PostgreSQL.Extensions;
 
@@ -12,10 +12,8 @@ public static class SnowflakeIdGeneratorExtensions
     /// </summary>
     /// <param name="generator">An instance of the SnowflakeIDGenerator used to generate the unique ID.</param>
     /// <returns>A long integer representing the unique Snowflake ID.</returns>
-    public static long Next(this SnowflakeIDGenerator generator)
+    public static long Next(this IdGenerator generator)
     {
-        var code = generator.GetCode();
-        
-        return Convert.ToInt64(code);
+        return generator.CreateId();
     }
 }
