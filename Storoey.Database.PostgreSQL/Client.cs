@@ -94,6 +94,22 @@ public class Client(ClientOptions clientOptions) : IAsyncDisposable
         await command.ExecuteNonQueryAsync(cancellationToken);
     }
 
+    public async Task<T?> Insert<T>(InsertParameter parameters, CancellationToken cancellationToken = default)
+    {
+        await Connect(cancellationToken);
+
+        await using var command = _connection!.CreateCommand();
+        command.CommandText = parameters.CommandText;
+        command.Parameters.AddRange(parameters.Values.Select(parameter => parameter.ToNpgsqlParameter()).ToArray());
+        command.Transaction = parameters.Transaction;
+
+        await command.PrepareAsync(cancellationToken);
+
+        var result = await command.ExecuteScalarAsync(cancellationToken);
+        
+        return result is T column ? column : default;
+    }
+
     /// <summary>
     ///     Inserts a batch of rows into the specified PostgreSQL table using binary import for high performance.
     /// </summary>
