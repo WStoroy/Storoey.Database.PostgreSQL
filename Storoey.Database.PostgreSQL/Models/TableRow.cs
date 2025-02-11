@@ -25,4 +25,22 @@ public sealed record TableRow
     /// <param name="columnName">The name of the column whose value is to be retrieved.</param>
     /// <returns>The value of the specified column, or null if the column is not found.</returns>
     public object? this[string columnName] => Columns.Single(x => x.Name == columnName).Value;
+
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="columnName"></param>
+    /// <typeparam name="TValue"></typeparam>
+    /// <returns></returns>
+    public TValue? Column<TValue>(string columnName)
+    {
+        var value = Columns.Single(x => x.Name == columnName).Value;
+
+        return value switch
+        {
+            null or DBNull => default,
+            _ => (TValue)value
+        };
+    }
 }

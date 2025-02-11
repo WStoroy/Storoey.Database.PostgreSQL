@@ -135,6 +135,19 @@ public class ClientIntegrationTests
             }
         });
     }
+
+    [Fact]
+    public async Task TestColumnMethod()
+    {
+        var result = await _client.Where(new WhereParameter
+        {
+            CommandText = "SELECT * FROM Simple"
+        });
+
+        var mapped = result.Select(row => row.Column<string?>("name")).ToList();
+        
+        Assert.NotEmpty(mapped);
+    }
 }
 
 public record PersonWithId
