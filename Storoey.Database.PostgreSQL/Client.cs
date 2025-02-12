@@ -17,7 +17,8 @@ public class Client(ClientOptions clientOptions) : IAsyncDisposable
         $"Host={clientOptions.Host};Port={clientOptions.Port};Database={clientOptions.Database};Username={clientOptions.Username};Password={clientOptions.Password};");
 
     private readonly IdGenerator _snowflakeIdGenerator = new(clientOptions.MachineId);
-    private NpgsqlConnection? _connection;
+
+    public NpgsqlConnection? Connection { get; private set; }
 
     /// <summary>
     ///     Disposes of resources used by the client asynchronously, including closing connections and disposing
@@ -49,9 +50,9 @@ public class Client(ClientOptions clientOptions) : IAsyncDisposable
     /// <returns>A task that represents the asynchronous operation.</returns>
     private async Task Connect(CancellationToken cancellationToken = default)
     {
-        _connection ??= await _dataSource.OpenConnectionAsync(cancellationToken);
+        Connection ??= await _dataSource.OpenConnectionAsync(cancellationToken);
 
-        if (_connection is null)
+        if (Connection is null)
         {
             throw new InvalidOperationException("Connection could not be established.");
         }
@@ -63,14 +64,14 @@ public class Client(ClientOptions clientOptions) : IAsyncDisposable
     /// <returns>A task that represents the asynchronous operation.</returns>
     private async Task Close()
     {
-        if (_connection is null)
+        if (Connection is null)
         {
             return;
         }
 
-        await _connection.CloseAsync();
-        await _connection.DisposeAsync();
-        _connection = null;
+        await Connection.CloseAsync();
+        await Connection.DisposeAsync();
+        Connection = null;
     }
 
     /// <summary>
@@ -84,10 +85,24 @@ public class Client(ClientOptions clientOptions) : IAsyncDisposable
     {
         await Connect(cancellationToken);
 
-        await using var command = _connection!.CreateCommand();
+        await using var command = Connection!.CreateCommand();
         command.CommandText = parameters.CommandText;
         command.Parameters.AddRange(parameters.Values.Select(parameter => parameter.ToNpgsqlParameter()).ToArray());
         command.Transaction = parameters.Transaction;
+
+        await command.PrepareAsync(cancellationToken);
+
+        await command.ExecuteNonQueryAsync(cancellationToken);
+    }
+    
+    public async Task InsertRaw(string commandText, NpgsqlParameter[] parameters, NpgsqlTransaction? transaction = null, CancellationToken cancellationToken = default)
+    {
+        await Connect(cancellationToken);
+
+        await using var command = Connection!.CreateCommand();
+        command.CommandText = commandText;
+        command.Parameters.AddRange(parameters);
+        command.Transaction = transaction;
 
         await command.PrepareAsync(cancellationToken);
 
@@ -98,7 +113,7 @@ public class Client(ClientOptions clientOptions) : IAsyncDisposable
     {
         await Connect(cancellationToken);
 
-        await using var command = _connection!.CreateCommand();
+        await using var command = Connection!.CreateCommand();
         command.CommandText = parameters.CommandText;
         command.Parameters.AddRange(parameters.Values.Select(parameter => parameter.ToNpgsqlParameter()).ToArray());
         command.Transaction = parameters.Transaction;
@@ -124,7 +139,7 @@ public class Client(ClientOptions clientOptions) : IAsyncDisposable
 
         var commandText = $"COPY {parameters.Table} ({string.Join(", ", parameters.Columns)}) FROM STDIN BINARY";
 
-        await using var writer = await _connection!.BeginBinaryImportAsync(commandText, cancellationToken);
+        await using var writer = await Connection!.BeginBinaryImportAsync(commandText, cancellationToken);
 
         foreach (var parameterList in parameters.Values)
         {
@@ -168,7 +183,7 @@ public class Client(ClientOptions clientOptions) : IAsyncDisposable
     {
         await Connect(cancellationToken);
 
-        await using var command = _connection!.CreateCommand();
+        await using var command = Connection!.CreateCommand();
         command.CommandText = parameters.CommandText.Contains("LIMIT")
             ? parameters.CommandText
             : parameters.CommandText + " LIMIT 1";
@@ -218,7 +233,7 @@ public class Client(ClientOptions clientOptions) : IAsyncDisposable
     {
         await Connect(cancellationToken);
 
-        await using var command = _connection!.CreateCommand();
+        await using var command = Connection!.CreateCommand();
         command.CommandText = parameters.CommandText;
         if (parameters.Parameters is not null)
         {
@@ -264,7 +279,7 @@ public class Client(ClientOptions clientOptions) : IAsyncDisposable
     {
         await Connect(cancellationToken);
 
-        await using var command = _connection!.CreateCommand();
+        await using var command = Connection!.CreateCommand();
         command.CommandText = parameters.CommandText;
         if (parameters.Parameters is not null)
         {

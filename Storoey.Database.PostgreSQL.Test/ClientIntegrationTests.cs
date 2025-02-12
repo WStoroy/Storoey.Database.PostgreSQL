@@ -1,4 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Npgsql;
+using NpgsqlTypes;
+using Storoey.Database.PostgreSQL.Models;
 using Storoey.Database.PostgreSQL.Options;
 using Storoey.Database.PostgreSQL.Parameters;
 using Xunit;
@@ -147,6 +150,18 @@ public class ClientIntegrationTests
         var mapped = result.Select(row => row.Column<string?>("name")).ToList();
         
         Assert.NotEmpty(mapped);
+    }
+    
+    [Fact]
+    public async Task JsonBInsert()
+    {
+        await _client.InsertRaw("INSERT INTO JsonTest (config) VALUES ($1)", [
+            new NpgsqlParameter
+            {
+                Value = """{ "clientId": "testing", "value": 1 }""",
+                NpgsqlDbType = NpgsqlDbType.Jsonb
+            }
+        ]);
     }
 }
 
