@@ -91,8 +91,16 @@ public static class ObjectExtensions
     ///     Thrown when the .NET type of the provided object does not have a corresponding
     ///     NpgsqlDbType.
     /// </exception>
-    public static NpgsqlParameter ToNpgsqlParameter(this object value)
+    public static NpgsqlParameter ToNpgsqlParameter(this object? value)
     {
+        if (value is null)
+        {
+            return new NpgsqlParameter
+            {
+                NpgsqlValue = DBNull.Value
+            };
+        }
+        
         var dotnetType = value.GetType();
         
         if (!DotNetTypeToNpgsqlDbType.TryGetValue(dotnetType, out var npgsqlDbType))

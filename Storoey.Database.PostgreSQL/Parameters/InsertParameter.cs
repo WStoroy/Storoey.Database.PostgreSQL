@@ -28,7 +28,7 @@ public record InsertParameter
     ///     This property is required and must be specified before execution.
     /// </remarks>
     [Required]
-    public required object[] Values { get; init; }
+    public required object?[] Values { get; init; }
 
     /// <summary>
     ///     Gets or sets the database transaction to be used when executing the command.

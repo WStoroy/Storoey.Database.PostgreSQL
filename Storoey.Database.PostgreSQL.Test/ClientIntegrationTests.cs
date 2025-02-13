@@ -153,6 +153,16 @@ public class ClientIntegrationTests
     }
     
     [Fact]
+    public async Task InsertNullColumnMethod()
+    {
+        await _client.Insert(new InsertParameter
+        {
+            CommandText = "INSERT INTO Simple (name) VALUES ($1)",
+            Values = [null]
+        });
+    }
+    
+    [Fact]
     public async Task JsonBInsert()
     {
         await _client.InsertRaw("INSERT INTO JsonTest (config) VALUES ($1)", [
