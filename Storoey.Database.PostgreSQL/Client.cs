@@ -48,7 +48,7 @@ public class Client(ClientOptions clientOptions) : IAsyncDisposable
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <exception cref="InvalidOperationException">Thrown if the connection could not be established.</exception>
     /// <returns>A task that represents the asynchronous operation.</returns>
-    private async Task Connect(CancellationToken cancellationToken = default)
+    public async Task Connect(CancellationToken cancellationToken = default)
     {
         Connection ??= await _dataSource.OpenConnectionAsync(cancellationToken);
 
@@ -62,7 +62,7 @@ public class Client(ClientOptions clientOptions) : IAsyncDisposable
     ///     Closes the connection to the PostgreSQL database.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>
-    private async Task Close()
+    public async Task Close()
     {
         if (Connection is null)
         {
@@ -73,7 +73,7 @@ public class Client(ClientOptions clientOptions) : IAsyncDisposable
         await Connection.DisposeAsync();
         Connection = null;
     }
-
+    
     /// <summary>
     ///     Inserts a row into the specified PostgreSQL table.
     /// </summary>
